@@ -1,0 +1,59 @@
+#!/bin/bash
+
+#
+# https://www.geeksforgeeks.org/how-to-set-upstream-branch-on-git/
+#
+
+
+REPOPATH=""
+BRANCH=""
+tag=""
+DELAY=0.5
+
+
+clear
+echo ""
+echo ""
+echo "[+] checking path of repo"
+sleep $DELAY
+
+
+#
+# https://www.cyberciti.biz/faq/unix-linux-bash-script-check-if-variable-is-empty/
+#
+if [ -z "$1" ]; then
+	echo "path argument for local repo not fond!"
+	sleep 2
+	exit 1
+else
+	REPOPATH="$1"
+	cd $REPOPATH && git fetch --all --tags
+	tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+	BRANCH="latest"
+
+	# check if local branch "latest" exists
+	if  [ `git branch --list $BRANCH` ];
+	then
+		echo "[+] local branch '$BANCH' found."
+		sleep $DELAY
+		
+		echo "[+] deleting local repo '$BRANCH'"
+		git branch -d $BRANCH
+		sleep $DELAY
+	fi
+
+	echo "[+] checking out latest tag $tag -> local branch '$BANCH'"
+	git checkout $tag -b $BRANCH
+	sleep $DELAY
+
+	echo "[+] set upstream branch"
+	git push --set-upstream origin $tag
+
+	echo "[+] update local branch '$BRANCH'"
+	git fetch origin $tag
+
+fi
+
+echo "[+] done! terminating scriopt... bye!"
+sleep 2
+exit 0;
